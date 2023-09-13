@@ -20,6 +20,7 @@ build:
     - "torch==1.11.0"
     - "torchvision==0.12.0"
     - "pyyaml==5.4.1"
+    - "numpy==1.22"
   
   # commands run after the environment is setup
   run:
