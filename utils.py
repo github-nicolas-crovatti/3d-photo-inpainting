@@ -893,6 +893,13 @@ def get_MiDaS_samples_cog(image_path, image_folder, depth_folder, config, specif
 
     samples = []
     generic_pose = np.eye(4)
+    len(config['traj_types']) 
+    print(f"traj_types: {len(config['traj_types'])}")
+    print(f"x_shift_range: {len(config['x_shift_range'])}")
+    print(f"y_shift_range: {len(config['y_shift_range'])}")
+    print(f"z_shift_range: {len(config['z_shift_range'])}")
+    print(f"video_postfix: {len(config['video_postfix'])}")
+    
     assert len(config['traj_types']) == len(config['x_shift_range']) ==\
            len(config['y_shift_range']) == len(config['z_shift_range']) == len(config['video_postfix']), \
            "The number of elements in 'traj_types', 'x_shift_range', 'y_shift_range', 'z_shift_range' and \

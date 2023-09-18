@@ -31,6 +31,9 @@ from MiDaS.monodepth_net import MonoDepthNet
 from MiDaS.run import run_depth
 from networks import Inpaint_Color_Net, Inpaint_Depth_Net, Inpaint_Edge_Net
 from utils import get_MiDaS_samples_cog, read_MiDaS_depth
+import base64
+import io 
+from PIL import Image
 
 cmd = "Xvfb :0 -screen 0 1024x768x24 -ac +extension GLX +render -noreset"
 subprocess.Popen(shlex.split(cmd))
@@ -48,9 +51,30 @@ class Predictor(BasePredictor):
 
         pass
 
+    def preprocessing(self, image: str, src_folder: str):
+        # Convert the Data URI to a NumPy array
+        image_format = image.split(";")[0].split("/")[-1]  # Extract image format (png, jpg, etc.)
+        image_data = base64.b64decode(image.split(",")[-1])
+
+        # Convert to PIL Image
+        image = Image.open(io.BytesIO(image_data))
+
+        # Specify the filename of the image
+        filename = f"output_image.{image_format}"
+
+        # Save the image
+        image.save(os.path.join(src_folder, filename))
+
+        # Return the path to the saved image
+        saved_image_path = os.path.join(os.getcwd(), src_folder, filename)
+
+        print(f"Saved image at: {saved_image_path}")
+        return saved_image_path
+
+
     def predict(
         self,
-        image_path: Path = Input(description="Input image"),
+        image: str = Input(description="Data URI of the input image"),
         effect: str = Input(
             description="Video animation effect", choices=["dolly-zoom-in", "zoom-in", "circle", "swing"]
         ),
@@ -62,6 +86,8 @@ class Predictor(BasePredictor):
         os.makedirs(config["mesh_folder"], exist_ok=True)
         os.makedirs(config["video_folder"], exist_ok=True)
         os.makedirs(config["depth_folder"], exist_ok=True)
+        
+        image_path = self.preprocessing(image, config['src_folder'])
 
         if config["offscreen_rendering"] is True:
             vispy.use(app="egl")
@@ -82,7 +108,7 @@ class Predictor(BasePredictor):
         config["x_shift_range"], config["y_shift_range"], config["z_shift_range"] = shift_range_dict[effect]
 
         sample_list = get_MiDaS_samples_cog(
-            str(image_path), config["src_folder"], config["depth_folder"], config, config["specific"]
+            str(image_path), config["src_folder"], config["depth_folder"], config, config["specific"], None
         )
         normal_canvas, all_canvas = None, None
 
