@@ -3,8 +3,8 @@ depth_feat_model_ckpt: checkpoints/depth-model.pth
 rgb_feat_model_ckpt: checkpoints/color-model.pth
 MiDaS_model_ckpt: MiDaS/model.pt
 use_boostmonodepth: True
-fps: 40
-num_frames: 240
+fps: 25
+num_frames: 150
 x_shift_range: [0.00, 0.00, -0.015, -0.015]
 y_shift_range: [0.00, 0.00, -0.015, -0.00]
 z_shift_range: [-0.05, -0.05, -0.05, -0.05]
@@ -45,3 +45,6 @@ extrapolation_thickness: 60
 repeat_inpaint_edge: True
 crop_border: [0.03, 0.03, 0.05, 0.03]
 anti_flickering: True
+
+
+WDB@yxv9rgw.bmv*jwv

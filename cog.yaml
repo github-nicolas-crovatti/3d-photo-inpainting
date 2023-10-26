@@ -30,6 +30,7 @@ build:
     - "pip install scipy matplotlib scikit-image"
     - "pip install pyqt5 pyopengl"
     - "pip install opencv-python-headless"
+    - "pip install imageio==2.8.0"
 
 # predict.py defines how predictions are run on your model
 predict: "predict.py:Predictor"

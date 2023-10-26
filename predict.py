@@ -10,6 +10,7 @@ import shlex
 import subprocess
 import sys
 import time
+import gc
 from functools import partial
 
 import cv2
@@ -41,14 +42,18 @@ subprocess.Popen(shlex.split(cmd))
 import os
 
 os.environ["DISPLAY"] = ":0"
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:512"
 
 from mesh import Canvas_view
+
 
 
 class Predictor(BasePredictor):
     def setup(self):
         """Load the model into memory to make running multiple predictions efficient"""
-
+        os.system('mkdir -vp  /root/.cache/torch/hub/checkpoints/')
+        os.system('cp -va weights/main.zip /root/.cache/torch/hub/')  
+        os.system('cp -va weights/ig_resnext101_32x8-c38310e5.pth /root/.cache/torch/hub/checkpoints/')  
         pass
 
     def preprocessing(self, image: str, src_folder: str):
@@ -80,6 +85,8 @@ class Predictor(BasePredictor):
         ),
     ) -> Path:
 
+
+
         config = yaml.load(open("argument.yml", "r"))
         # set for headless rendering
         config["offscreen_rendering"] = True
@@ -99,7 +106,7 @@ class Predictor(BasePredictor):
                            'circle': 'circle',
                            'swing': 'swing'}
 
-        shift_range_dict = {"dolly-zoom-in": [[0,00], [0.00], [-0.05]],
+        shift_range_dict = {"dolly-zoom-in": [[0.00], [0.00], [-0.05]],
                             "zoom-in": [[0.00], [0.00], [-0.05]],
                             "circle": [[-0.015], [-0.015], [-0.05]],
                             "swing": [[-0.015], [-0.00], [-0.05]]}
@@ -114,6 +121,8 @@ class Predictor(BasePredictor):
 
         if isinstance(config["gpu_ids"], int) and (config["gpu_ids"] >= 0):
             device = config["gpu_ids"]
+            torch.cuda.empty_cache()
+            gc.collect()
         else:
             device = "cpu"
 
@@ -165,7 +174,7 @@ class Predictor(BasePredictor):
                 )
                 depth = vis_depths[-1]
                 model = None
-                torch.cuda.empty_cache()
+    
                 print("Start Running 3D_Photo ...")
                 print(f"Loading edge model at {time.time()}")
                 depth_edge_model = Inpaint_Edge_Net(init_weights=True)
@@ -204,11 +213,7 @@ class Predictor(BasePredictor):
 
                 if rt_info is False:
                     continue
-                rgb_model = None
-                color_feat_model = None
-                depth_edge_model = None
-                depth_feat_model = None
-                torch.cuda.empty_cache()
+
             if config["save_ply"] is True or config["load_ply"] is True:
                 verts, colors, faces, Height, Width, hFov, vFov = read_ply(mesh_fi)
             else:
@@ -249,5 +254,11 @@ class Predictor(BasePredictor):
                 mean_loc_depth=mean_loc_depth,
             )
 
+            del rgb_model
+            #del color_feat_model
+            del depth_edge_model
+            del depth_feat_model
+            gc.collect()
+            torch.cuda.empty_cache()
             print(f'Done. Saving to output path: {output_path}')
             return Path(str(output_path))

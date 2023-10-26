@@ -23,7 +23,9 @@ def _make_resnet_backbone(resnet):
 
 
 def _make_pretrained_resnext101_wsl(use_pretrained):
-    resnet = torch.hub.load("facebookresearch/WSL-Images:main", "resnext101_32x8d_wsl")
+    print('FB LOAD')
+    #resnet = torch.hub.load("facebookresearch/WSL-Images:main", "resnext101_32x8d_wsl")
+    resnet = torch.hub.load("weights/", "ig_resnext101_32x8-c38310e5")
     return _make_resnet_backbone(resnet)
 
 

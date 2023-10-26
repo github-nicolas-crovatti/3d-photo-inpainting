@@ -1,6 +1,7 @@
 """Compute depth maps for images in the input folder.
 """
 import os
+import gc
 import glob
 import torch
 # from monodepth_net import MonoDepthNet
@@ -10,6 +11,8 @@ import numpy as np
 import cv2
 import imageio
 
+
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:512"
 
 def run_depth(img_names, input_path, output_path, model_path, Net, utils, target_w=None):
     """Run MonoDepthNN to compute depth maps.
@@ -22,7 +25,9 @@ def run_depth(img_names, input_path, output_path, model_path, Net, utils, target
     print("initialize")
 
     # select device
-    device = torch.device("cpu")
+    #device = torch.device("cuda")
+    gc.collect()
+    torch.cuda.empty_cache()
     print("device: %s" % device)
 
     # load network

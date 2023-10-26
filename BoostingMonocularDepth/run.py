@@ -2,9 +2,12 @@ from operator import getitem
 from torchvision.transforms import Compose
 from torchvision.transforms import transforms
 
+import gc
+
 # OUR
 from utils import ImageandPatchs, ImageDataset, generatemask, getGF_fromintegral, calculateprocessingres, rgb2gray,\
     applyGridpatch
+import sys
 
 # MIDAS
 import midas.utils
@@ -28,6 +31,7 @@ import argparse
 import warnings
 warnings.simplefilter('ignore', np.RankWarning)
 
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:512"
 # select device
 if torch.cuda.is_available():
     device = torch.device("cuda")
@@ -57,6 +61,7 @@ def run(dataset, option):
     pix2pixmodel.eval()
 
     # Decide which depth estimation network to load
+    print(f"DepthNet {option.depthNet}")
     if option.depthNet == 0:
         midas_model_path = "midas/model.pt"
         global midasmodel
@@ -78,6 +83,7 @@ def run(dataset, option):
         leresmodel.load_state_dict(strip_prefix_if_present(checkpoint['depth_model'], "module."),
                                     strict=True)
         del checkpoint
+        gc.collect()
         torch.cuda.empty_cache()
         leresmodel.to(device)
         leresmodel.eval()
@@ -298,6 +304,12 @@ def run(dataset, option):
         else:
             midas.utils.write_depth(path, imageandpatchs.estimation_updated_image, bits=2, colored=option.colorize_results)
 
+    midasmodel = None
+    del midasmodel
+    pix2pixmodel = None
+    del pix2pixmodel
+    gc.collect()
+    torch.cuda.empty_cache()
     print("finished")
 
 
@@ -408,6 +420,7 @@ def doubleestimate(img, size1, size2, pix2pixsize, net_type):
     prediction_mapped = (prediction_mapped - torch.min(prediction_mapped)) / (
                 torch.max(prediction_mapped) - torch.min(prediction_mapped))
     prediction_mapped = prediction_mapped.squeeze().cpu().numpy()
+
 
     return prediction_mapped
 
@@ -582,3 +595,4 @@ if __name__ == "__main__":
 
     # Run pipeline
     run(dataset_, option_)
+    sys.exit(0)

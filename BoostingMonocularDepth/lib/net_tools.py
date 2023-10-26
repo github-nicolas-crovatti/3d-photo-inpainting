@@ -1,6 +1,7 @@
 import importlib
 import torch
 import os
+import gc
 from collections import OrderedDict
 
 
@@ -40,6 +41,7 @@ def load_ckpt(args, depth_model, shift_model, focal_model):
         depth_model.load_state_dict(strip_prefix_if_present(checkpoint['depth_model'], "module."),
                                     strict=True)
         del checkpoint
+        gc.collect()
         torch.cuda.empty_cache()
 
 

@@ -1,5 +1,19 @@
+import os
 import torch
 import torch.nn as nn
+from torchvision.models.resnet import ResNet, Bottleneck
+
+
+def _resnext(arch, block, layers, pretrained, progress, **kwargs):
+    model = ResNet(block, layers, **kwargs)
+
+    model_path = os.path.join(os.path.dirname(os.getcwd()), 'weights/')
+
+    print(f"FB LOAD 2 from {model_path}")
+    checkpoint = os.path.join(model_path, "ig_resnext101_32x8-c38310e5.pth")
+    state_dict = torch.load(checkpoint)
+    model.load_state_dict(state_dict)
+    return model
 
 
 def _make_encoder(features, use_pretrained):
@@ -22,8 +36,11 @@ def _make_resnet_backbone(resnet):
     return pretrained
 
 
-def _make_pretrained_resnext101_wsl(use_pretrained):
-    resnet = torch.hub.load("facebookresearch/WSL-Images:main", "resnext101_32x8d_wsl")
+def _make_pretrained_resnext101_wsl(use_pretrained, **kwargs):
+    print('Loading ResNet')
+    kwargs['groups'] = 32
+    kwargs['width_per_group'] = 8
+    resnet = _resnext('resnext101_32x8d', Bottleneck, [3, 4, 23, 3], True, False, **kwargs)
     return _make_resnet_backbone(resnet)
 
 

@@ -1,25 +1,14 @@
-#!/bin/sh
-fb_status=$(wget --spider -S https://filebox.ece.vt.edu/ 2>&1 | grep  "HTTP/1.1 200 OK")
-
+#!/bin/bash
 mkdir checkpoints
 
-echo "downloading from filebox ..."
-wget https://filebox.ece.vt.edu/~jbhuang/project/3DPhoto/model/color-model.pth
-wget https://filebox.ece.vt.edu/~jbhuang/project/3DPhoto/model/depth-model.pth
-wget https://filebox.ece.vt.edu/~jbhuang/project/3DPhoto/model/edge-model.pth
-wget https://filebox.ece.vt.edu/~jbhuang/project/3DPhoto/model/model.pt
+echo "downloading from S3 ..."
 
-mv color-model.pth checkpoints/.
-mv depth-model.pth checkpoints/.
-mv edge-model.pth checkpoints/.
-mv model.pt MiDaS/.
+[[ ! -f "BoostingMonocularDepth/pix2pix/checkpoints/mergemodel/latest_net_G.pth" ]] && wget -P BoostingMonocularDepth/pix2pix/checkpoints/mergemodel/ https://teads-ai-creative-lab-weights.s3.eu-west-1.amazonaws.com/checkpoints/mergemodel/latest_net_G.pth
+[[ ! -f "checkpoints/color-model.pth" ]] && wget -P checkpoints/ https://teads-ai-creative-lab-weights.s3.eu-west-1.amazonaws.com/checkpoints/color-model.pth
+[[ ! -f "checkpoints/depth-model.pth" ]] && wget -P checkpoints/ https://teads-ai-creative-lab-weights.s3.eu-west-1.amazonaws.com/checkpoints/depth-model.pth
+[[ ! -f "checkpoints/edge-model.pth" ]] && wget -P checkpoints/ https://teads-ai-creative-lab-weights.s3.eu-west-1.amazonaws.com/checkpoints/edge-model.pth
+[[ ! -f "MiDaS/model.pt" ]] && get -P MiDaS/ https://teads-ai-creative-lab-weights.s3.eu-west-1.amazonaws.com/MiDaS/model.pt
+[[ ! -f "weights/ig_resnext101_32x8-c38310e5.pth" ]] && wget -P weights/ https://teads-ai-creative-lab-weights.s3.eu-west-1.amazonaws.com/weights/ig_resnext101_32x8-c38310e5.pth
+[[ ! -f "BoostingMonocularDepth/midas/model.pt" ]] && wget -P BoostingMonocularDepth/midas/ https://teads-ai-creative-lab-weights.s3.eu-west-1.amazonaws.com/midas/model.pt
 
-echo "cloning from BoostingMonocularDepth ..."
-git clone https://github.com/compphoto/BoostingMonocularDepth.git
-mkdir -p BoostingMonocularDepth/pix2pix/checkpoints/mergemodel/
-
-echo "downloading mergenet weights ..."
-wget https://filebox.ece.vt.edu/~jbhuang/project/3DPhoto/model/latest_net_G.pth
-mv latest_net_G.pth BoostingMonocularDepth/pix2pix/checkpoints/mergemodel/
-wget https://github.com/intel-isl/MiDaS/releases/download/v2/model-f46da743.pt
-mv model-f46da743.pt BoostingMonocularDepth/midas/model.pt
+echo "Done"
