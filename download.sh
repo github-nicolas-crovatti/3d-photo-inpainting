@@ -11,4 +11,4 @@ echo "downloading from S3 ..."
 [[ ! -f "weights/ig_resnext101_32x8-c38310e5.pth" ]] && wget -P weights/ https://teads-ai-creative-lab-weights.s3.eu-west-1.amazonaws.com/weights/ig_resnext101_32x8-c38310e5.pth
 [[ ! -f "BoostingMonocularDepth/midas/model.pt" ]] && wget -P BoostingMonocularDepth/midas/ https://teads-ai-creative-lab-weights.s3.eu-west-1.amazonaws.com/midas/model.pt
 
-echo "Done"
+echo "Done`"
